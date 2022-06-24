@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+func BucketName() string {
+	return os.Getenv("BUCKET_NAME")
+}
+
 func CognitoAppClientID() string {
 	return os.Getenv("COGNITO_APP_CLIENT_ID")
 }

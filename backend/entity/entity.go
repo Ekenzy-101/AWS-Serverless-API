@@ -26,4 +26,16 @@ type AuthInput struct {
 type Entity interface {
 	SetKey() Entity
 	Key() Key
+	Prefix() Prefix
 }
+
+type Prefix string
+
+const (
+	PrefixCart               Prefix = "CART"
+	PrefixUser               Prefix = "USER"
+	PrefixProduct            Prefix = "PRODUCT"
+	PrefixProductCategory    Prefix = "PRODUCT_CATEGORY"
+	PrefixProductSubCategory Prefix = "PRODUCT_SUB_CATEGORY"
+	PrefixOrder              Prefix = "ORDER"
+)

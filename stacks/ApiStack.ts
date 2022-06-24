@@ -3,10 +3,11 @@ import { AuthStack } from "./AuthStack";
 import { StorageStack } from "./StorageStack";
 
 export function ApiStack({ stack, app }: StackContext) {
-  const { table } = use(StorageStack);
+  const { table, s3 } = use(StorageStack);
   const { userPoolClientId, userPoolClientSecret, userPoolId } = use(AuthStack);
 
   const environment = {
+    BUCKET_NAME: s3.bucketName,
     TABLE_NAME: table.tableName,
     APP_ENV: app.stage,
     COGNITO_USER_POOL_ID: userPoolId,
@@ -35,11 +36,12 @@ export function ApiStack({ stack, app }: StackContext) {
         runtime: "go1.x",
         srcPath: "backend",
         environment,
-        permissions: [table],
+        permissions: [table, s3],
       },
     },
     routes: {
       "GET /": { function: "functions/main.go" },
+      // Accounts
       "POST /accounts/register": { function: "functions/registerUser/main.go" },
       "POST /accounts/login": { function: "functions/loginUser/main.go" },
       "POST /accounts/login/verify": {
@@ -72,6 +74,14 @@ export function ApiStack({ stack, app }: StackContext) {
       "POST /accounts/mfa/verify": {
         authorizer: "cognito",
         function: "functions/verifyUserMFA/main.go",
+      },
+      // Product Categories
+      "POST /product-categories": {
+        authorizer: "cognito",
+        function: "functions/createProductCategory/main.go",
+      },
+      "GET /product-categories": {
+        function: "functions/getProductCategories/main.go",
       },
     },
   });

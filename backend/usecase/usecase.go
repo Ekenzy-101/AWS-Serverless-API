@@ -9,6 +9,7 @@ type Usecase interface {
 	AuthUsecase
 	UserUsecase
 	RequestUsecase
+	ProductCategoryUsecase
 }
 
 type usecase struct {
@@ -16,7 +17,7 @@ type usecase struct {
 }
 
 func init() {
-	repo := repository.New(infra.NewAuthClient(), infra.NewDatabaseClient())
+	repo := repository.New(infra.NewAuthClient(), infra.NewDatabaseClient(), infra.NewObjectClient())
 	Default = New(repo)
 }
 
