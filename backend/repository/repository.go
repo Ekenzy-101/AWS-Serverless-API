@@ -18,6 +18,7 @@ import (
 type Repository interface {
 	AuthRepository
 	ProductCategoryRepository
+	TestRepository
 	UserRepository
 }
 

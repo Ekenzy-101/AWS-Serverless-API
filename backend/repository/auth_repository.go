@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -22,6 +23,7 @@ import (
 type AuthRepository interface {
 	ChangePassword(ctx context.Context, params entity.AuthInput) error
 	ForgotPassword(ctx context.Context, params entity.AuthInput) error
+	IsEmailInUse(ctx context.Context, email string) error
 	LoginUser(ctx context.Context, params entity.AuthInput) (entity.M, error)
 	LogoutUser(ctx context.Context, params entity.AuthInput) error
 	RefreshTokens(ctx context.Context, params entity.AuthInput) (entity.M, error)
@@ -69,6 +71,30 @@ func (r *repository) ForgotPassword(ctx context.Context, params entity.AuthInput
 	}
 
 	r.logResult("ForgotPassword", result)
+	return nil
+}
+
+func (r *repository) IsEmailInUse(ctx context.Context, email string) error {
+	result, err := r.authClient.ListUsers(ctx, &cognitoidentityprovider.ListUsersInput{
+		UserPoolId:      aws.String(config.CognitoUserPoolID()),
+		Filter:          aws.String(fmt.Sprintf("email = \"%v\"", email)),
+		Limit:           aws.Int32(1),
+		AttributesToGet: []string{"email"},
+	})
+
+	var ae smithy.APIError
+	if errors.As(err, &ae) {
+		return fmt.Errorf(ae.ErrorMessage())
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if len(result.Users) != 0 {
+		return fmt.Errorf(" Account with the given email already exists")
+	}
+
 	return nil
 }
 

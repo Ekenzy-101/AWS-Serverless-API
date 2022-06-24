@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	Base     `json:"-" dynamodbav:",inline"`
+	Base
 	ID       string `json:"id,omitempty" dynamodbav:"id,omitempty"`
 	Email    string `json:"email,omitempty" dynamodbav:"email,omitempty"`
 	Name     string `json:"name,omitempty" dynamodbav:"name,omitempty"`
@@ -17,8 +17,8 @@ type User struct {
 var _ Entity = &User{}
 
 func (u *User) SetKey() Entity {
-	u.PK = fmt.Sprintf("USER#%v", u.ID)
-	u.SK = fmt.Sprintf("USER#%v", u.ID)
+	u.PK = string(u.Prefix())
+	u.SK = fmt.Sprintf("%v#%v", u.Prefix(), u.ID)
 	return u
 }
 
@@ -27,4 +27,8 @@ func (u *User) Key() Key {
 		"pk": &types.AttributeValueMemberS{Value: u.PK},
 		"sk": &types.AttributeValueMemberS{Value: u.SK},
 	}
+}
+
+func (u *User) Prefix() Prefix {
+	return PrefixUser
 }

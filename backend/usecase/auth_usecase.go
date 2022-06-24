@@ -11,6 +11,7 @@ type AuthUsecase interface {
 	DisableUserMFA(ctx context.Context, params entity.AuthInput) error
 	EnableUserMFA(ctx context.Context, params entity.AuthInput) error
 	ForgotPassword(ctx context.Context, params entity.AuthInput) error
+	IsEmailInUse(ctx context.Context, email string) error
 	LoginUser(ctx context.Context, params entity.AuthInput) (entity.M, error)
 	LogoutUser(ctx context.Context, params entity.AuthInput) error
 	RefreshTokens(ctx context.Context, params entity.AuthInput) (entity.M, error)
@@ -34,6 +35,10 @@ func (u *usecase) DisableUserMFA(ctx context.Context, params entity.AuthInput) e
 func (u *usecase) EnableUserMFA(ctx context.Context, params entity.AuthInput) error {
 	params.EnableMFA = true
 	return u.repo.SetUserMFAPreference(ctx, params)
+}
+
+func (u *usecase) IsEmailInUse(ctx context.Context, email string) error {
+	return u.repo.IsEmailInUse(ctx, email)
 }
 
 func (u *usecase) SetupUserMFA(ctx context.Context, params entity.AuthInput) (string, error) {

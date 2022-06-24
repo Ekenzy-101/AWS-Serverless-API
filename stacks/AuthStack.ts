@@ -6,6 +6,7 @@ import {
   ClientAttributes,
   UserPoolClientIdentityProvider,
 } from "aws-cdk-lib/aws-cognito";
+import { PolicyStatement } from "aws-cdk-lib/aws-iam";
 import {
   AwsCustomResource,
   PhysicalResourceId,
@@ -50,7 +51,29 @@ export function AuthStack({ stack, app }: StackContext) {
         generateSecret: true,
       },
     },
+    defaults: {
+      function: {
+        srcPath: "backend",
+        runtime: "go1.x",
+      },
+    },
+    triggers: {
+      preSignUp: {
+        handler: "triggers/preSignup/main.go",
+        environment: {
+          APP_ENV: app.stage,
+          COGNITO_USER_POOL_ID: "",
+        },
+      },
+    },
   });
+
+  auth.attachPermissionsForTriggers([
+    new PolicyStatement({
+      actions: ["cognito-idp:*"],
+      resources: ["*"],
+    }),
+  ]);
 
   const userPoolClientId = auth.userPoolClientId;
   const userPoolId = auth.userPoolId;
